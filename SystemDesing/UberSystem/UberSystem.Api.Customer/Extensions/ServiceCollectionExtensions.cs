@@ -1,82 +1,86 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using System.Reflection;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using UberSystem.Domain.Entities;
+using UberSystem.Domain.Interfaces;
+using UberSystem.Domain.Interfaces.Services;
 using UberSystem.Infrastructure;
-
+using UberSystem.Service;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using UberSytem.Dto;
 namespace UberSystem.Api.Customer.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection Register(this IServiceCollection services, IConfiguration configuration)
+        /// <summary>
+        /// Add needed instances for database
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddDatabase(this IServiceCollection services, ConfigurationManager configuration)
         {
-
-            services.AddControllers();
-            services.AddEndpointsApiExplorer();
-            services.AddSwaggerGen(opt =>
+            // Configure DbContext with Scoped lifetime  
+            services.AddDbContext<UberSystemDbContext>(options =>
             {
-                opt.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-                {
-                    Version = "v1",
-                    Title = "UberSystem.Api.Customer",
-                    Description = "An ASP.NET Core Web API for managing customers",
-                    TermsOfService = new Uri("https://lms-hcmuni.fpt.edu.vn/course/view.php?id=2110"),
-                    Contact = new Microsoft.OpenApi.Models.OpenApiContact
-                    {
-                        Name = "Contact",
-                        Url = new Uri("https://lms-hcmuni.fpt.edu.vn/course/view.php?id=2110")
-                    },
-                    License = new Microsoft.OpenApi.Models.OpenApiLicense
-                    {
-                        Name = "License",
-                        Url = new Uri("https://lms-hcmuni.fpt.edu.vn/course/view.php?id=2110")
-                    }
-                });
-                opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 1safsfsdfdfd\"",
-                });
+                options.UseSqlServer(configuration.GetConnectionString("Default"),
+                    sqlOptions => sqlOptions.CommandTimeout(120));
+                // options.UseLazyLoadingProxies();
+            }
+            );
 
-                opt.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] {}
-                    }
-                });
-                // Set the comments path for the Swagger JSON and UI.
-                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                opt.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+            services.AddScoped<Func<UberSystemDbContext>>((provider) => () => provider.GetService<UberSystemDbContext>());
+            services.AddScoped<DbFactory>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            //        services.AddIdentity<User, IdentityRole>()
+            //.AddEntityFrameworkStores<UberSystemDbContext>()
+            //.AddDefaultTokenProviders();
+            // Configure JWT authentication
+       /*     var jwtSettings = configuration.GetSection("JwtSettings");
+            var key = Encoding.ASCII.GetBytes(jwtSettings["SecretKey"]);
 
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
             });
-            // Register database
-            var connectionString = configuration.GetConnectionString("Default") ?? string.Empty;
-            services.AddDatabase(connectionString);
-
-
+*/
+            // AutoMapper
+            services.AddAutoMapper(typeof(MappingProfileExtension));
             return services;
         }
 
-        public static IServiceCollection AddDatabase(this IServiceCollection services, string connection)
+        /// <summary>
+        /// Add instances of in-use services
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddServices(this IServiceCollection services)
         {
-            services.AddDbContext<UberSystemDbContext>(opt =>
-            {
-                opt.UseSqlServer(connection, sqlServerOptionsAction: sqlOptions =>
-                {
-                    sqlOptions.CommandTimeout(120);
-                });
-            });
+            services.AddScoped<ICabService, CabService>();
+            services.AddScoped<ITripService, TripService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+
+
+
+
+            services.AddScoped(typeof(TokenService));
+
             return services;
         }
     }

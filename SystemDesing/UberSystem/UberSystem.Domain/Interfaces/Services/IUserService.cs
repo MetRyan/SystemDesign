@@ -24,8 +24,11 @@ namespace UberSystem.Domain.Interfaces.Services
         Task SendEmailCustomer(string email);
         Task SendVerificationEmail(string email, User user);
           Task Delete(long userid);
+
         Task<User?> Login(string email, string password);
         Task<User> DecodeVerificationToken(string token);
+/*        //Customer
+        Task<bool> userOrder();*/
     }
 }
 

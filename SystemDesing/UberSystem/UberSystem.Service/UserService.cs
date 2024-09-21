@@ -25,7 +25,6 @@ namespace UberSystem.Service
         private readonly IConfiguration _configuration;
         private readonly IServiceProvider _serviceProvider;
 
-        private readonly Dictionary<long, CancellationTokenSource> _cancellationTokens = new Dictionary<long, CancellationTokenSource>();
 
         public UserService(IUnitOfWork unitOfWork, IMapper mapper, IEmailService emailService, IConfiguration configuration, IServiceProvider serviceProvider)
         {
@@ -447,6 +446,11 @@ namespace UberSystem.Service
             }
 
         }
+
+     /*   public Task<bool> userOrder()
+        {
+
+        }*/
     }
 }
 

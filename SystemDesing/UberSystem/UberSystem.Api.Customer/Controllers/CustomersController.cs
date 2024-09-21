@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using UberSystem.Domain.Entities;
 using UberSystem.Domain.Interfaces.Services;
 using UberSystem.Infrastructure;
 using UberSystem.Service;
 using UberSytem.Dto;
+using UberSytem.Dto.Requests;
 using UberSytem.Dto.Responses;
 
 namespace UberSystem.Api.Customer.Controllers
@@ -14,15 +16,20 @@ namespace UberSystem.Api.Customer.Controllers
     {
 
      
-        private readonly IUserService _userService;
-        private readonly TokenService _tokenService;
-        private readonly IMapper _mapper;
+       /* private readonly ITripService _tripService;*/
 
-        public CustomersController(IUserService userService, TokenService tokenService, IMapper mapper)
+        private readonly IMapper _mapper;
+        private readonly IUserService _userService;
+        private readonly ITripService _tripService;
+        private readonly IPaymentService _paymentService;
+
+
+        public CustomersController(IMapper mapper, IUserService userService, ITripService tripService, IPaymentService paymentService)
         {
-            _userService = userService;
-            _tokenService = tokenService;
             _mapper = mapper;
+            _userService = userService;
+            _tripService = tripService;
+            _paymentService = paymentService;
         }
 
         /// <summary>
@@ -37,7 +44,7 @@ namespace UberSystem.Api.Customer.Controllers
         public async Task<ActionResult<IEnumerable<UserReponseInformation>>> GetCustomers()
         {
             var listUser = await _userService.getAllUserCustomer();
-            var UserReponse = _mapper.Map<IEnumerable< UserReponseInformation>>(listUser);
+            var UserReponse = _mapper.Map<IEnumerable<UserReponseInformation>>(listUser);
 
             if (UserReponse == null)
             {
@@ -57,6 +64,36 @@ namespace UberSystem.Api.Customer.Controllers
             });
         }
 
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> CreateTrip(TripRequest request)
+        {
+            try
+            {
+                var trip = _mapper.Map<Trip>(request);
+                trip.Status = "0";
+                var paymentId= await _tripService.tripOrder(trip);
+                var payment = _mapper.Map<Payment>(request);
+                payment.TripId = paymentId;
+
+                await _paymentService.AddPayment(payment);
+
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+            return Ok(new ApiResponseModel<string>
+            {
+                StatusCode = HttpStatusCode.OK,
+                Message = " đã đặt đợi cho tài xế confirm"
+            });
+
+
+        }
+
         /// <summary>
         /// Retrieve customers in system
         /// </summary>
@@ -64,54 +101,86 @@ namespace UberSystem.Api.Customer.Controllers
         /// <remarks>
         /// 
         /// </remarks>
-        [HttpGet("customers/{id}")]
+        /*[HttpGet("customers/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<Domain.Entities.Customer>> GetCustomer(long id)
+        public async Task<ActionResult<UserReponseInformation>> GetCustomer(long id)
         {
-            if (_context.Customers == null)
-            {
-                return NotFound();
-            }
-            var customer = await _context.Customers.FindAsync(id);
-
-            if (customer == null)
-            {
-                return NotFound();
-            }
-
-            return customer;
-        }
+           
+        }*/
 
         // PUT: api/Customers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutCustomer(long id, Domain.Entities.Customer customer)
-        //{
-        //    if (id != customer.Id)
-        //    {
-        //        return BadRequest();
-        //    }
 
-        //    _context.Entry(customer).State = EntityState.Modified;
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCustomer(long id, User customer)
+            {
+            if (id != customer.Id)
+            {
+                return BadRequest();
+            }
+            var getUser = _userService.getUserbyId(id);
+            if (getUser == null)
+            {
+                return NotFound(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "User not found"
+                });
+            }
+            try { 
+            await _userService.Update(customer);
+            
+            }catch (Exception ex) {
+                return BadRequest(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "Somthing wrong with update please try again"
+                });
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!CustomerExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+            }
+            return Ok(new ApiResponseModel<string>
+            {
+                StatusCode = HttpStatusCode.NotFound,
+                Message = "Update successs"
+            });
 
-        //    return NoContent();
-        //}
+
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCustomer(long id)
+        {
+          
+            var getUser = _userService.getUserbyId(id);
+            if (getUser == null)
+            {
+                return NotFound(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "User not found"
+                });
+            }
+            try
+            {
+                await _userService.Delete(id);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "Somthing wrong with delete please try again"
+                });
+
+            }
+            return Ok(new ApiResponseModel<string>
+            {
+                StatusCode = HttpStatusCode.NotFound,
+                Message = "delete successs"
+            });
+
+
+        }
 
         // POST: api/Customers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
