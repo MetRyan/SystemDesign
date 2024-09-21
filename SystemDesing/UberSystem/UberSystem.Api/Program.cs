@@ -4,12 +4,15 @@ using UberSystem.Infrastructure;
 using System.Reflection;
 using UberSystem.Api.Extensions;
 using Microsoft.OpenApi.Models;
+using UberSytem.Dto.Requests;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddDbContext<UberSystemDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 // builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -30,6 +33,8 @@ builder.Services.AddSwaggerGen(options =>
             Url = new Uri("https://lms-hcmuni.fpt.edu.vn/course/view.php?id=2110")
         }
     });
+    builder.Services.Configure<SmtpSettingsModel>(builder.Configuration.GetSection("Smtp"));
+
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
         Name = "Authorization",
@@ -59,6 +64,7 @@ var connectionString = builder.Configuration.GetConnectionString("Default");
 //DI services
 builder.Services.AddDatabase(connectionString).AddServices();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -74,6 +80,11 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+/*using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<UberSystemDbContext>();
+    dbContext.Database.Migrate();
+}*/
 
 app.Run();
 

@@ -1,21 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 using UberSystem.Domain.Interfaces.Services;
 using UberSystem.Infrastructure;
+using UberSystem.Service;
+using UberSytem.Dto;
+using UberSytem.Dto.Responses;
 
 namespace UberSystem.Api.Customer.Controllers
 {
     public class CustomersController : BaseApiController
     {
-        private readonly UberSystemDbContext _context;
-        private readonly IUserService _userService;
 
-        public CustomersController(UberSystemDbContext context, IUserService userService)
+     
+        private readonly IUserService _userService;
+        private readonly TokenService _tokenService;
+        private readonly IMapper _mapper;
+
+        public CustomersController(IUserService userService, TokenService tokenService, IMapper mapper)
         {
-            _context = context;
             _userService = userService;
+            _tokenService = tokenService;
+            _mapper = mapper;
         }
-        
+
         /// <summary>
         /// Retrieve customers in system
         /// </summary>
@@ -25,13 +34,27 @@ namespace UberSystem.Api.Customer.Controllers
         /// </remarks>
         [HttpGet("customers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Domain.Entities.Customer>>> GetCustomers()
+        public async Task<ActionResult<IEnumerable<UserReponseInformation>>> GetCustomers()
         {
-            if (_context.Customers == null)
+            var listUser = await _userService.getAllUserCustomer();
+            var UserReponse = _mapper.Map<IEnumerable< UserReponseInformation>>(listUser);
+
+            if (UserReponse == null)
             {
-                return NotFound();
+                return NotFound(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "User not found"
+                });
             }
-            return await _context.Customers.ToListAsync();
+            return Ok(new ApiResponseModel<IEnumerable<UserReponseInformation>>
+
+
+            {
+                StatusCode = HttpStatusCode.OK,
+                Data = UserReponse
+                
+            });
         }
 
         /// <summary>

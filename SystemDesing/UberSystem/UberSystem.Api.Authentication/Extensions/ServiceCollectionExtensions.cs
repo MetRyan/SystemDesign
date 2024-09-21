@@ -71,6 +71,8 @@ namespace UberSystem.Api.Authentication.Extensions
     	public static IServiceCollection AddServices(this IServiceCollection services)
     	{
         	services.AddScoped<ICabService, CabService>();
+
+            services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped(typeof(TokenService));
 

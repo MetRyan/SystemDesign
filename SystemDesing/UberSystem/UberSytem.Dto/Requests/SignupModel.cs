@@ -11,5 +11,7 @@
         public required string Email { get; set; }
 
         public required string Password { get; set; }
+        //ss
+        public string? ClientUri { get; set; } 
     }
 }

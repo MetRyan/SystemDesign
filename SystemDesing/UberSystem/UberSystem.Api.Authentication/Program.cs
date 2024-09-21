@@ -1,10 +1,12 @@
 using System.Reflection;
 using UberSystem.Api.Authentication.Extensions;
+using UberSytem.Dto.Requests;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.Configure<SmtpSettingsModel>(builder.Configuration.GetSection("Smtp"));
 
 builder.Services.AddSwaggerGen(opt =>
 {

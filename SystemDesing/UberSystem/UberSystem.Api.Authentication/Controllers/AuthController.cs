@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using UberSystem.Domain.Entities;
@@ -16,13 +17,15 @@ namespace UberSystem.Api.Authentication.Controllers
     {
         private readonly IUserService _userService;
         private readonly TokenService _tokenService;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IMapper _mapper;
 
-        public AuthController(IUserService userService, TokenService tokenService, IMapper mapper)
+        public AuthController(IUserService userService, TokenService tokenService, IMapper mapper, IServiceProvider serviceProvider)
         {
             _userService = userService;
             _tokenService = tokenService;
             _mapper = mapper;
+            _serviceProvider = serviceProvider;
         }
 
         /// <summary>
@@ -77,12 +80,47 @@ namespace UberSystem.Api.Authentication.Controllers
                     Message = "Invalid role's value in the system!"
                 });
             var user = _mapper.Map<User>(request);
-            await _userService.Add(user);
+
+            //check email -> 
+
+            await _userService.SendVerificationEmail(user.Email, user);
+
+
+
             return Ok(new ApiResponseModel<string>
             {
                 StatusCode = HttpStatusCode.OK,
                 Message = "Success",
             });
+        }
+            [HttpGet("verify-email")]
+            public async Task<IActionResult> VerifyEmail(string token)
+            {
+                //var userId = await _userService.ValidateVerificationToken(token);
+
+                    var user = _userService.DecodeVerificationToken(token);
+
+            if (user != null)
+                {
+                await _userService.Add(await user);
+
+                // Xử lý thêm thông tin người dùng nếu cần
+                return Ok("Email verified successfully.");
+                }
+                return BadRequest("Invalid token.");
+            }
+        [HttpDelete]
+        public async Task<IActionResult> DeleteUser(long id=10)
+        {
+            try
+            {
+                await _userService.Delete(id);
+                return Ok("User deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
