@@ -29,6 +29,7 @@ namespace UberSystem.Domain.Interfaces.Services
         Task<User> DecodeVerificationToken(string token);
 /*        //Customer
         Task<bool> userOrder();*/
+        //
     }
 }
 

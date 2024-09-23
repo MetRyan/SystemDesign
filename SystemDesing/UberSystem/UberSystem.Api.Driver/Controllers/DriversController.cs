@@ -1,22 +1,17 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 using UberSystem.Domain.Entities;
 using UberSystem.Domain.Interfaces.Services;
-using UberSystem.Infrastructure;
-using UberSystem.Service;
-using UberSytem.Dto;
 using UberSytem.Dto.Requests;
 using UberSytem.Dto.Responses;
+using UberSytem.Dto;
 
-namespace UberSystem.Api.Customer.Controllers
+namespace UberSystem.Api.Driver.Controllers
 {
-    public class CustomersController : BaseApiController
+    public class DriversController : BaseApiController
     {
-
-     
-       /* private readonly ITripService _tripService;*/
+        /* private readonly ITripService _tripService;*/
 
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
@@ -24,7 +19,7 @@ namespace UberSystem.Api.Customer.Controllers
         private readonly IPaymentService _paymentService;
 
 
-        public CustomersController(IMapper mapper, IUserService userService, ITripService tripService, IPaymentService paymentService)
+        public DriversController(IMapper mapper, IUserService userService, ITripService tripService, IPaymentService paymentService)
         {
             _mapper = mapper;
             _userService = userService;
@@ -39,36 +34,11 @@ namespace UberSystem.Api.Customer.Controllers
         /// <remarks>
         /// 
         /// </remarks>
-        [HttpGet("customers")]
+        [HttpGet("get-all-driver")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<UserReponseInformation>>> GetCustomers()
+        public async Task<ActionResult<IEnumerable<UserReponseInformation>>> getDriver()
         {
-            var listUser = await _userService.getAllUserCustomer();
-            var UserReponse = _mapper.Map<IEnumerable<UserReponseInformation>>(listUser);
-
-            if (UserReponse == null)
-            {
-                return NotFound(new ApiResponseModel<string>
-                {
-                    StatusCode = HttpStatusCode.NotFound,
-                    Message = "User not found"
-                });
-            }
-            return Ok(new ApiResponseModel<IEnumerable<UserReponseInformation>>
-
-
-            {
-                StatusCode = HttpStatusCode.OK,
-                Data = UserReponse
-                
-            });
-        }
-
-        [HttpGet("driver-2km")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<UserReponseInformation>>> GetCustomers()
-        {
-            var listUser = await _userService.getAllUserCustomer();
+            var listUser = await _userService.getAllUserdriver();
             var UserReponse = _mapper.Map<IEnumerable<UserReponseInformation>>(listUser);
 
             if (UserReponse == null)
@@ -89,35 +59,114 @@ namespace UberSystem.Api.Customer.Controllers
             });
         }
 
-        [HttpPost]
+        [HttpGet("get-all-trip-no-Confirm-yet")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> CreateTrip(TripRequest request)
+        public async Task<ActionResult<IEnumerable<TripReponse>>> GetAllTripNoConfirmyet()
         {
-            try
+            var listRepository = await _tripService.getAllTripNoDriverYet();
+            var listReponse = _mapper.Map<IEnumerable<TripReponse>>(listRepository);
+
+            if (listReponse == null)
             {
-                var trip = _mapper.Map<Trip>(request);
-                trip.Status = "0";
-                var paymentId= await _tripService.tripOrder(trip);
-                var payment = _mapper.Map<Payment>(request);
-                payment.TripId = paymentId;
-
-                await _paymentService.AddPayment(payment);
-
-
+                return NotFound(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "No Trip not found"
+                });
             }
-            catch (Exception ex)
-            {
+            return Ok(new ApiResponseModel<IEnumerable<TripReponse>>
 
-                return BadRequest(ex.Message);
-            }
-            return Ok(new ApiResponseModel<string>
+
             {
                 StatusCode = HttpStatusCode.OK,
-                Message = " đã đặt đợi cho tài xế confirm"
+                Data = listReponse
+
             });
-
-
         }
+
+        [HttpGet("get-all-trip-base-location-driver/{driverId}")]
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<TripReponse>>> GetAllTripbaseDrivernoConfirmyet(long driverId)
+        {
+            var listRepository = await _tripService.getAllTripNoDriverYet(driverId);
+            var listReponse = _mapper.Map<IEnumerable<TripReponse>>(listRepository);
+
+            if (listReponse == null)
+            {
+                return NotFound(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "No Trip not found"
+                });
+            }
+            return Ok(new ApiResponseModel<IEnumerable<TripReponse>>
+
+
+            {
+                StatusCode = HttpStatusCode.OK,
+                Data = listReponse,
+                Message = "Only list < 2km"
+
+
+            });
+        }
+
+
+        /* [HttpGet("ListTrip")]
+         [ProducesResponseType(StatusCodes.Status200OK)]
+         public async Task<ActionResult<IEnumerable<UserReponseInformation>>> GetCustomers()
+         {
+             var listUser = await _userService.getAllUserdriver();
+             var UserReponse = _mapper.Map<IEnumerable<UserReponseInformation>>(listUser);
+
+             if (UserReponse == null)
+             {
+                 return NotFound(new ApiResponseModel<string>
+                 {
+                     StatusCode = HttpStatusCode.NotFound,
+                     Message = "User not found"
+                 });
+             }
+             return Ok(new ApiResponseModel<IEnumerable<UserReponseInformation>>
+
+
+             {
+                 StatusCode = HttpStatusCode.OK,
+                 Data = UserReponse
+
+             });
+         }*/
+
+        /*        [HttpPost]
+                [ProducesResponseType(StatusCodes.Status200OK)]
+                public async Task<ActionResult> CreateTrip(TripRequest request)
+                {
+                    try
+                    {
+                        var trip = _mapper.Map<Trip>(request);
+                        trip.Status = "0";
+                        var paymentId = await _tripService.tripOrder(trip);
+                        var payment = _mapper.Map<Payment>(request);
+                        payment.TripId = paymentId;
+
+                        await _paymentService.AddPayment(payment);
+
+
+                    }
+                    catch (Exception ex)
+                    {
+
+                        return BadRequest(ex.Message);
+                    }
+                    return Ok(new ApiResponseModel<string>
+                    {
+                        StatusCode = HttpStatusCode.OK,
+                        Message = " đã đặt đợi cho tài xế confirm"
+                    });
+
+
+                }*/
 
         /// <summary>
         /// Retrieve customers in system
@@ -130,16 +179,24 @@ namespace UberSystem.Api.Customer.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<UserReponseInformation>> GetCustomer(long id)
         {
-           
+
         }*/
+        [HttpPost]
+
+        public async Task<IActionResult> ConfirmOrder(float tripid, float driverid)
+        {
+           
+
+        }
+
 
         // PUT: api/Customers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCustomer(long id, User customer)
-            {
-            if (id != customer.Id)
+        public async Task<IActionResult> UpdateDriver(long id, User Driver)
+        {
+            if (id != Driver.Id)
             {
                 return BadRequest();
             }
@@ -152,10 +209,13 @@ namespace UberSystem.Api.Customer.Controllers
                     Message = "User not found"
                 });
             }
-            try { 
-            await _userService.Update(customer);
-            
-            }catch (Exception ex) {
+            try
+            {
+                await _userService.Update(Driver);
+
+            }
+            catch (Exception ex)
+            {
                 return BadRequest(new ApiResponseModel<string>
                 {
                     StatusCode = HttpStatusCode.NotFound,
@@ -172,9 +232,9 @@ namespace UberSystem.Api.Customer.Controllers
 
         }
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCustomer(long id)
+        public async Task<IActionResult> DeleteDriver(long id)
         {
-          
+
             var getUser = _userService.getUserbyId(id);
             if (getUser == null)
             {
@@ -206,59 +266,5 @@ namespace UberSystem.Api.Customer.Controllers
 
 
         }
-
-        // POST: api/Customers
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPost]
-        //public async Task<ActionResult<Domain.Entities.Customer>> PostCustomer(Domain.Entities.Customer customer)
-        //{
-        //    if (_context.Customers == null)
-        //    {
-        //        return Problem("Entity set 'UberSystemDbContext.Customers'  is null.");
-        //    }
-        //    _context.Customers.Add(customer);
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        if (CustomerExists(customer.Id))
-        //        {
-        //            return Conflict();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return CreatedAtAction("GetCustomer", new { id = customer.Id }, customer);
-        //}
-
-        // DELETE: api/Customers/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteCustomer(long id)
-        //{
-        //    if (_context.Customers == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    var customer = await _context.Customers.FindAsync(id);
-        //    if (customer == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Customers.Remove(customer);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-        //private bool CustomerExists(long id)
-        //{
-        //    return (_context.Customers?.Any(e => e.Id == id)).GetValueOrDefault();
-        //}
     }
 }

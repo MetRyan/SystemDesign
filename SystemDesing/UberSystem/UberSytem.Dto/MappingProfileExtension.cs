@@ -33,6 +33,10 @@ namespace UberSytem.Dto
                 .ForMember(dest => dest.Method, opt => opt.MapFrom(src => src.Method))
                 .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Amount));
             CreateMap<SignupModel, User>();
+
+            CreateMap<DriverReponse, Driver>();
+            CreateMap <DriverReponse, User>();  
+
         }
     }
 }
