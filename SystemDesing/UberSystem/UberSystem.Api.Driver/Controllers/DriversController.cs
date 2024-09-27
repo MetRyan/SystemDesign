@@ -38,7 +38,7 @@ namespace UberSystem.Api.Driver.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<UserReponseInformation>>> getDriver()
         {
-            var listUser = await _userService.getAllUserdriver();
+                var listUser = await _userService.getAllUserdriver();
             var UserReponse = _mapper.Map<IEnumerable<UserReponseInformation>>(listUser);
 
             if (UserReponse == null)
@@ -181,13 +181,13 @@ namespace UberSystem.Api.Driver.Controllers
         {
 
         }*/
-        [HttpPost]
+       /* [HttpPost]
 
         public async Task<IActionResult> ConfirmOrder(float tripid, float driverid)
         {
            
 
-        }
+        }*/
 
 
         // PUT: api/Customers/5

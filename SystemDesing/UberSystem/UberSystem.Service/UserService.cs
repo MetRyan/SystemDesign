@@ -398,7 +398,8 @@ namespace UberSystem.Service
         public async Task<IEnumerable< User>> getAllUserdriver()
         {
             var listUser = await _unitOfWork.Repository<User>().GetAllAsync();
-            return listUser.Where(p => p.Role == 1);
+           return listUser.Where(p => p.Role == 1);
+
         }
 
         public async Task<User> DecodeVerificationToken(string token)

@@ -64,12 +64,12 @@ namespace UberSystem.Api.Customer.Controllers
             });
         }
 
-        [HttpGet("driver-2km")]
+        [HttpGet("driver-2km/{userid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<UserReponseInformation>>> GetCustomers()
+        public async Task<ActionResult<IEnumerable<UserReponseInformation>>> getDrivernearby(long userId)
         {
-            var listUser = await _userService.getAllUserCustomer();
-            var UserReponse = _mapper.Map<IEnumerable<UserReponseInformation>>(listUser);
+            var getUser = await _userService.getAllUserCustomer();
+            var UserReponse = _mapper.Map<IEnumerable<UserReponseInformation>>(getUser);
 
             if (UserReponse == null)
             {

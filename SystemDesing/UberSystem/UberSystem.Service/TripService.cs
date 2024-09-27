@@ -75,9 +75,10 @@ namespace UberSystem.Service
                 var tripRepository = _unitOfWork.Repository<Trip>();
                 var getAllTrips = await tripRepository.GetAllAsync();
                 var getDriver = await _driverService.GetDriverbyId(driverid);
-                if (getDriver == null) { 
-                throw new Exception("Invalid Driver");
-                
+                if (getDriver == null)
+                {
+                    throw new Exception("Invalid Driver");
+
                 }
 
 

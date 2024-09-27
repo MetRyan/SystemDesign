@@ -75,6 +75,8 @@ namespace UberSystem.Api.Driver.Extensions
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<IDriverService,DriverService>();
+
 
 
 

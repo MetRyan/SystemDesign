@@ -47,7 +47,28 @@ namespace UberSystem.Service
 
         public async Task<Driver> GetDriverbyId(long id)
         {
-            return await _unitOfWork.Repository<Driver>().GetAsync(p => p.Id ==id);  
+           
+
+            var driverRepository = _unitOfWork.Repository<Driver>();
+       
+
+            try
+            {
+                var driverlist = await driverRepository.GetAllAsync();
+                var getdriver = driverlist.FirstOrDefault(p=> p.UserId ==id);
+
+                if (getdriver == null)
+                {
+                    throw new KeyNotFoundException($"Driver with ID {id} not found.");
+                }
+
+                return getdriver;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (implement your logging mechanism here)
+                throw new Exception("An error occurred while retrieving the driver.", ex);
+            }
         }
 
         private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
