@@ -16,7 +16,14 @@ namespace UberSystem.Domain.Interfaces.Services
 
         Task<IEnumerable<Trip>> getAllTripNoDriverYet(long driverId);
 
+        //for user to view driver nearby 2km 
+
+
+
+
         //check xem User co dat chua mỗi user chỉ được dặt 1 lần;
+
+
 
 
         Task<bool> CustomerOrderStatus(long customerid);
@@ -28,7 +35,12 @@ namespace UberSystem.Domain.Interfaces.Services
         Task<Trip> getTripById(long id);
         // click confirm order
 
-        Task driverConfirmOrder(long tripId, long driverId);
+        Task <bool> driverConfirmOrder(long tripId, long driverId);
+
+        Task<Trip>  getCurrentTripOfDriver(long driverId);
+
+        Task<bool> DriverConfirmOrderDone(long tripId);
+
 
     }
 }

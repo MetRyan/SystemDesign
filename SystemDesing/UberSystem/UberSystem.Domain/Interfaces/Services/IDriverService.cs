@@ -9,7 +9,7 @@ namespace UberSystem.Domain.Interfaces.Services
 {
     public interface IDriverService
     {
-        Task<IEnumerable<Driver>> getAvailableDrivers(double pickupLatitude, double pickupLongitude);
+        Task<IEnumerable<Driver>> getAvailableDriversbyTripId(long id);
 
         Task<Driver> GetDriverbyId(long id);    
 

@@ -112,6 +112,32 @@ namespace UberSystem.Api.Driver.Controllers
             });
         }
 
+        [HttpPost("ConfirmOrder")]
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> ConfirmOrder(long driverId, long tripId)
+        {
+            var result = await _tripService.driverConfirmOrder(tripId, driverId);
+
+            if (result != true)
+            {
+                return NotFound(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "Not Found"
+                });
+            }
+            return Ok(new ApiResponseModel<string>
+
+
+            {
+                StatusCode = HttpStatusCode.OK,
+                Message = " Confirm Order success"
+
+
+            });
+        }
+
 
         /* [HttpGet("ListTrip")]
          [ProducesResponseType(StatusCodes.Status200OK)]
@@ -181,13 +207,13 @@ namespace UberSystem.Api.Driver.Controllers
         {
 
         }*/
-       /* [HttpPost]
+        /* [HttpPost]
 
-        public async Task<IActionResult> ConfirmOrder(float tripid, float driverid)
-        {
-           
+         public async Task<IActionResult> ConfirmOrder(float tripid, float driverid)
+         {
 
-        }*/
+
+         }*/
 
 
         // PUT: api/Customers/5

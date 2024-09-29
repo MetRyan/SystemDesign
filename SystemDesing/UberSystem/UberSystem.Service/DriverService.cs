@@ -30,15 +30,26 @@ namespace UberSystem.Service
             throw new NotImplementedException();
         }*/
 
-        public async Task<IEnumerable<Driver>> getAvailableDrivers(double pickupLatitude, double pickupLongitude)
+        public async Task<IEnumerable<Driver>> getAvailableDriversbyTripId(long id)
+
+
         {
+
+            //double pickupLatitude, double pickupLongitude
+            var tripRepository = _unitOfWork.Repository<Trip>();
+
+            var getTrip = await tripRepository.GetAsync(p => p.Id == id);
+            if (getTrip == null) {
+                throw new Exception("Not found Trip id");
+            }
+
             var driverRepository =  _unitOfWork.Repository<Driver>();   
 
             var drivers = await driverRepository.GetAllAsync();
 
             // Tính khoảng cách giữa điểm đón và tài xế, lọc trong bán kính 2km
             var availableDrivers = drivers
-                .Where(driver => CalculateDistance(pickupLatitude, pickupLongitude,(double) driver.LocationLatitude, (double)driver.LocationLongitude) <= 2.0)
+                .Where(driver => CalculateDistance((double)getTrip.SourceLatitude, (double)getTrip.SourceLongitude, (double) driver.LocationLatitude, (double)driver.LocationLongitude) <= 2.0)
             //    .OrderByDescending(driver => driver.Ratings) // Sắp xếp theo rating
                 .ToList();
 

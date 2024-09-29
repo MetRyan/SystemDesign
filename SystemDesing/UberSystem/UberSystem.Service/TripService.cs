@@ -21,15 +21,15 @@ namespace UberSystem.Service
         private readonly IConfiguration _configuration;
 
 
-        public TripService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IDriverService _driverService)
+        public TripService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IDriverService driverService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _configuration = configuration;
-            _driverService = _driverService;
+            _driverService = driverService;
         }
 
-        public async Task driverConfirmOrder(long tripId, long driverId)
+        public async  Task <bool> driverConfirmOrder(long tripId, long driverId)
         {
 
             try { 
@@ -38,13 +38,25 @@ namespace UberSystem.Service
                 await _unitOfWork.BeginTransaction();
 
                 var getTrip = await getTripById(tripId);
+                if(getTrip.Status=="1") {
+                    throw new Exception("The Trip Already Confirm");
+                }
+                var getDriver = await _driverService.GetDriverbyId(driverId);
+                if (getDriver == null) {
+                
+                    throw new Exception("The Driver Not Found");
+
+                }
+
+
+
                 getTrip.Status = "1";
                 getTrip.DriverId = driverId;
 
                await tripRepository.UpdateAsync(getTrip);   
 
                await _unitOfWork.CommitTransaction();
-
+                return true;
 
             }catch(DbUpdateException) { 
                     _unitOfWork.RollbackTransaction();
@@ -161,6 +173,46 @@ namespace UberSystem.Service
 
             } catch(Exception ex) { throw new Exception(ex.Message); }
 
+        }
+
+        public Task<Trip> getCurrentTripOfDriver(long driverId)
+        {
+            var TripRepository = _unitOfWork.Repository<Trip>();
+            var getTrip = TripRepository.GetAsync(p=> p.DriverId == driverId && p.Status =="1");
+            if (getTrip != null)
+            {
+                return getTrip;
+
+            }
+            else {
+
+                throw new Exception("Not Found any");
+            }
+
+        }
+
+        public async Task<bool> DriverConfirmOrderDone(long tripId)
+        {
+            var tripRepository = _unitOfWork.Repository<Trip>();
+            var getTrip = await tripRepository.GetAsync(p => p.Id == tripId);
+            if (getTrip != null) {
+                throw new Exception("Trip not Found");
+            }
+            try
+            {
+                getTrip.Status = "3";
+                await _unitOfWork.BeginTransaction();
+                await tripRepository.UpdateAsync(getTrip);
+                await _unitOfWork.CommitTransaction();
+
+            }
+            catch {
+
+                await _unitOfWork.RollbackTransaction();
+                // Log inner exception for details
+                throw;
+            }
+            return true;
         }
 
         /*   public Task<IEnumerable<Trip>> getAllTripNoDriverYet(long driverId)

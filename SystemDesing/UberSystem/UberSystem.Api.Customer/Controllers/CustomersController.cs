@@ -21,15 +21,18 @@ namespace UberSystem.Api.Customer.Controllers
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly ITripService _tripService;
+        private readonly IDriverService _driverService;
+
         private readonly IPaymentService _paymentService;
 
 
-        public CustomersController(IMapper mapper, IUserService userService, ITripService tripService, IPaymentService paymentService)
+        public CustomersController(IMapper mapper, IUserService userService, ITripService tripService, IPaymentService paymentService, IDriverService driverService)
         {
             _mapper = mapper;
             _userService = userService;
             _tripService = tripService;
             _paymentService = paymentService;
+            _driverService = driverService;
         }
 
         /// <summary>
@@ -64,27 +67,26 @@ namespace UberSystem.Api.Customer.Controllers
             });
         }
 
-        [HttpGet("driver-2km/{userid}")]
+        [HttpGet("driver-2km/{tripid}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<UserReponseInformation>>> getDrivernearby(long userId)
+        public async Task<ActionResult<IEnumerable<UserReponseInformation>>> getDrivernearby(long tripid)
         {
-            var getUser = await _userService.getAllUserCustomer();
-            var UserReponse = _mapper.Map<IEnumerable<UserReponseInformation>>(getUser);
+            var getDriver = await _driverService.getAvailableDriversbyTripId(tripid);
 
-            if (UserReponse == null)
+            if (getDriver == null)
             {
                 return NotFound(new ApiResponseModel<string>
                 {
                     StatusCode = HttpStatusCode.NotFound,
-                    Message = "User not found"
+                    Message = "No driver near by found"
                 });
             }
-            return Ok(new ApiResponseModel<IEnumerable<UserReponseInformation>>
+            return Ok(new ApiResponseModel<IEnumerable<Driver>>
 
 
             {
                 StatusCode = HttpStatusCode.OK,
-                Data = UserReponse
+                Data = getDriver
 
             });
         }
