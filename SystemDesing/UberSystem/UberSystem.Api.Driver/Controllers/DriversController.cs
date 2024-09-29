@@ -84,6 +84,31 @@ namespace UberSystem.Api.Driver.Controllers
             });
         }
 
+        [HttpGet("get-current-trip-base-driverId")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<TripReponse>> GetCurrenTrip(long tripId)
+        {
+            var listRepository = await _tripService.getCurrentTripOfDriver(tripId);
+            var listReponse = _mapper.Map<TripReponse>(listRepository);
+
+            if (listReponse == null)
+            {
+                return NotFound(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "No Trip not found"
+                });
+            }
+            return Ok(new ApiResponseModel<TripReponse>
+
+
+            {
+                StatusCode = HttpStatusCode.OK,
+                Data = listReponse
+
+            });
+        }
+
         [HttpGet("get-all-trip-base-location-driver/{driverId}")]
 
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -111,6 +136,42 @@ namespace UberSystem.Api.Driver.Controllers
 
             });
         }
+
+        [HttpPost("SuccessOrder")]
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> ConfirmSucessOrder(long driverId)
+        {
+            var trip = await _tripService.getCurrentTripOfDriver( driverId);
+            if (trip == null) {
+                return NotFound(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "Not Found Any Trip base this DriverId"
+                });
+            }
+
+            var result = await _tripService.DriverConfirmOrderDone(trip.Id);
+
+            if (result != true)
+            {
+                return NotFound(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "error Update"
+                });
+            }
+            return Ok(new ApiResponseModel<string>
+
+
+            {
+                StatusCode = HttpStatusCode.OK,
+                Message = " the Trip Order success"
+
+
+            });
+        }
+
 
         [HttpPost("ConfirmOrder")]
 

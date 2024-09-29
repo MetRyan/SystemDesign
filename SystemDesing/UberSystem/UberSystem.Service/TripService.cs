@@ -195,7 +195,7 @@ namespace UberSystem.Service
         {
             var tripRepository = _unitOfWork.Repository<Trip>();
             var getTrip = await tripRepository.GetAsync(p => p.Id == tripId);
-            if (getTrip != null) {
+            if (getTrip == null) {
                 throw new Exception("Trip not Found");
             }
             try

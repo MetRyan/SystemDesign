@@ -22,17 +22,20 @@ namespace UberSystem.Api.Customer.Controllers
         private readonly IUserService _userService;
         private readonly ITripService _tripService;
         private readonly IDriverService _driverService;
-
         private readonly IPaymentService _paymentService;
+        private readonly ICustomerService _customerService;
 
 
-        public CustomersController(IMapper mapper, IUserService userService, ITripService tripService, IPaymentService paymentService, IDriverService driverService)
+
+        public CustomersController(IMapper mapper, IUserService userService, ITripService tripService, IPaymentService paymentService, IDriverService driverService, ICustomerService customerSerice)
         {
             _mapper = mapper;
             _userService = userService;
             _tripService = tripService;
             _paymentService = paymentService;
             _driverService = driverService;
+            _customerService = customerSerice;
+
         }
 
         /// <summary>
@@ -64,6 +67,54 @@ namespace UberSystem.Api.Customer.Controllers
                 StatusCode = HttpStatusCode.OK,
                 Data = UserReponse
                 
+            });
+        }
+
+        [HttpGet("Rating")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<Rating>>> getAllRating()
+        {
+            var listRating = await _customerService.getAll();
+          //  var UserReponse = _mapper.Map<IEnumerable<Rating>>(listUser);
+
+            if (listRating == null)
+            {
+                return NotFound(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "User not found"
+                });
+            }
+            return Ok(new ApiResponseModel<IEnumerable<Rating>>
+
+
+            {
+                StatusCode = HttpStatusCode.OK,
+                Data = listRating
+
+            });
+        }
+
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> RatingAfterOrderSuccess(Rating rating)
+        {
+            var result = await _customerService.addRating(rating);  
+
+            if (result == false)
+            {
+                return NotFound(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "User not found"
+                });
+            }
+            return Ok(new ApiResponseModel<string>
+
+            {
+                StatusCode = HttpStatusCode.OK,
+                Message = "rating success"
+
             });
         }
 

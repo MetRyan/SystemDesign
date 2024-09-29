@@ -7,8 +7,9 @@ using UberSystem.Domain.Entities;
 
 namespace UberSystem.Domain.Interfaces.Services
 {
-    public interface ICustomer
+    public interface ICustomerService
     {
-
+        Task<IEnumerable<Rating>> getAll();
+        Task <bool> addRating(Rating rating);
     }
 }

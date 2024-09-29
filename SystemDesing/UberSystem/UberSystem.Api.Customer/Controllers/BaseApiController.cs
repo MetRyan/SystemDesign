@@ -6,6 +6,7 @@ namespace UberSystem.Api.Customer.Controllers
     [ApiController]
     public class BaseApiController : ControllerBase
     {
+
     }
 
 
