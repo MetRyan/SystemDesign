@@ -43,7 +43,15 @@ namespace UberSystem.Api.Extensions
     	/// <returns></returns>
     	public static IServiceCollection AddServices(this IServiceCollection services)
     	{
-        	return services.AddScoped<ICabService, CabService>();
-    	}
+            services.AddScoped<ICabService, CabService>();
+            services.AddScoped<ITripService, TripService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ITripService, TripService>();
+
+            services.AddScoped(typeof(TokenService));
+
+            return services;
+        }
 	}
 }

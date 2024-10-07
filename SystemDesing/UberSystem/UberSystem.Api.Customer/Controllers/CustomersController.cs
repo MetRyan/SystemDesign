@@ -95,10 +95,11 @@ namespace UberSystem.Api.Customer.Controllers
             });
         }
 
-        [HttpPost]
+        [HttpPost("rating")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> RatingAfterOrderSuccess(Rating rating)
+        public async Task<ActionResult> RatingAfterOrderSuccess(CreateFeedback request)
         {
+            var rating = _mapper.Map<Rating>(request);
             var result = await _customerService.addRating(rating);  
 
             if (result == false)
