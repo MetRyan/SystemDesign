@@ -136,6 +136,35 @@ namespace UberSystem.Api.Driver.Controllers
 
             });
         }
+         [HttpGet("get-history-order/{driverId}")]
+
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<HistoryTrip>>> gethistoryOrderbaseDriverId(long driverId)
+        {
+                var listTrip = await _tripService.getAllHistoryTripBaseDriverId(driverId);
+            if (listTrip == null)
+            {
+                return NotFound(new ApiResponseModel<string>
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "No Trip not found"
+                });
+            }
+        var listMapTrip = _mapper.Map<IEnumerable<HistoryTrip>>(listTrip);
+        //var tripReponse = _mapper.Map<IEnumerable<TripReponse>>(listMapTrip);
+
+            
+            return Ok(new ApiResponseModel<IEnumerable<HistoryTrip>>
+
+
+            {
+                StatusCode = HttpStatusCode.OK,
+                Data = listMapTrip,
+                Message = "Only list < 2km"
+
+
+            });
+        }
 
         [HttpPost("SuccessOrder")]
 

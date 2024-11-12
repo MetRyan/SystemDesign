@@ -11,6 +11,7 @@ namespace UberSystem.Domain.Interfaces.Services
         Task  Add(User user);
         Task<User> getUserbyId(long id);
 
+Task<IEnumerable<User>> getAll();
         Task<IEnumerable<User>> getAllUserCustomer();
         Task<IEnumerable<User>> getAllUserdriver();
 

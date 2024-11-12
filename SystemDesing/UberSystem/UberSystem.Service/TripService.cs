@@ -150,6 +150,8 @@ namespace UberSystem.Service
             {
                 await _unitOfWork.RollbackTransaction();
                 // Log inner exception for details
+                Console.WriteLine($"Trip Details: Id={trip.Id}, CustomerId={trip.CustomerId}, DriverId={trip.DriverId}, Status={trip.Status}, Source=({trip.SourceLatitude},{trip.SourceLongitude}), Destination=({trip.DestinationLatitude},{trip.DestinationLongitude}), CreatedAt={trip.CreateAt}");
+
                 Console.WriteLine(dbEx.InnerException?.Message);
                 throw;
             }
@@ -213,6 +215,30 @@ namespace UberSystem.Service
                 throw;
             }
             return true;
+        }
+
+        public async Task<IEnumerable<Trip>> getAllHistoryTripBaseDriverId(long driverId)
+        {
+            var tripRepository =  _unitOfWork.Repository<Trip>();
+        //    var listTrip = await  tripRepository.GetAllAsync(); 
+         var listTrip = await _unitOfWork.DbContext.Set<Trip>()
+            .Include(trip => trip.Customer)              // Nạp thực thể Customer
+            .ThenInclude(customer => customer.User)      // Nạp thực thể User từ Customer
+            .Include(trip => trip.Payment)               // Nạp thực thể Payment
+            .Where(trip => trip.DriverId == driverId)
+            .ToListAsync();
+            var getDriverr = _driverService.GetDriverbyId(driverId);
+            if(getDriverr == null){
+throw new Exception(" Can not find any driver base Id");
+
+            }
+            var getlistbaseId =  listTrip.Where(p => p.DriverId== driverId);
+        if(listTrip == null){
+            throw new Exception (" No Trip Found");
+        }
+        return getlistbaseId;
+
+
         }
 
         /*   public Task<IEnumerable<Trip>> getAllTripNoDriverYet(long driverId)

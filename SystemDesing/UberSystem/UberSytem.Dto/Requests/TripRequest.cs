@@ -8,6 +8,7 @@ namespace UberSytem.Dto.Requests
 {
     public class TripRequest
     {
+        public long Id { get; set; }
 
 
         public double SourceLatitude { get; set; }  // Vĩ độ điểm đón

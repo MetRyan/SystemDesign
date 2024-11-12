@@ -17,10 +17,15 @@ namespace UberSytem.Dto
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(x => Helper.GenerateRandomLong()));
             CreateMap<User, Driver>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(x => Helper.GenerateRandomLong()));
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(x => Helper.GenerateRandomLong()))
+                .ReverseMap();
 
-            CreateMap<User, UserResponseModel>();
-            CreateMap<User, UserReponseInformation>();
+            CreateMap<User, UserResponseModel>().ReverseMap();
+            CreateMap<Driver, UserReponseInformation>().ReverseMap();
+            CreateMap<CreateFeedback, Rating>().ReverseMap();
+
+
+            CreateMap<User, UserReponseInformation>().ReverseMap(); 
             CreateMap<TripRequest, Trip>()
            .ForMember(dest => dest.SourceLatitude, opt => opt.MapFrom(src => src.SourceLatitude))
            .ForMember(dest => dest.SourceLongitude, opt => opt.MapFrom(src => src.SourceLongitude))
@@ -37,7 +42,31 @@ namespace UberSytem.Dto
 
 
             CreateMap<DriverReponse, Driver>();
-            CreateMap <DriverReponse, User>();  
+
+            // CreateMap<HistoryTrip,Trip>()
+            // .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.PaymentId));
+            // CreateMap<HistoryTrip,Payment>();
+            // CreateMap<HistoryTrip,Customer>()
+            
+             CreateMap<Trip, HistoryTrip>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Customer.User.UserName))
+            .ForMember(dest => dest.CustomerId, opt => opt.MapFrom(src => src.Customer.Id))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+            .ForMember(dest => dest.SourceLatitude, opt => opt.MapFrom(src => src.SourceLatitude))
+            .ForMember(dest => dest.SourceLongitude, opt => opt.MapFrom(src => src.SourceLongitude))
+            .ForMember(dest => dest.DestinationLatitude, opt => opt.MapFrom(src => src.DestinationLatitude))
+            .ForMember(dest => dest.DestinationLongitude, opt => opt.MapFrom(src => src.DestinationLongitude))
+            .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => src.PaymentId))
+            .ForMember(dest => dest.Method, opt => opt.MapFrom(src => src.Payment.Method))
+            .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Payment.Amount));
+            CreateMap<HistoryTrip,Customer>();
+// tu customer moi qua dc User
+            CreateMap<HistoryTrip,User>();
+
+            CreateMap<HistoryTrip,Payment>();
+
+
+            CreateMap<DriverReponse, User>();  
 
         }
     }

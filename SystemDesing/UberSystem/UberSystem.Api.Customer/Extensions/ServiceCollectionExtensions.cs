@@ -70,12 +70,15 @@ namespace UberSystem.Api.Customer.Extensions
         /// <returns></returns>
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
-            services.AddScoped<ICabService, CabService>();
+           services.AddScoped<ICabService, CabService>();
             services.AddScoped<ITripService, TripService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IDriverService,DriverService>();
+            services.AddScoped<ICustomerService,CustomerService>();
+
+
 
 
 

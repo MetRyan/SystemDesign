@@ -124,6 +124,22 @@ namespace UberSystem.Api.Customer.Controllers
         public async Task<ActionResult<IEnumerable<UserReponseInformation>>> getDrivernearby(long tripid)
         {
             var getDriver = await _driverService.getAvailableDriversbyTripId(tripid);
+            var driverResponses = new List<UserReponseInformation>();
+
+            // Loop through available drivers to get their details
+            foreach (var driver in getDriver)
+            {
+                var driverDetails = await _userService.getUserbyId((long)driver.UserId); // Assuming `Id` is the identifier for drivers
+
+                if (driverDetails != null) // Check if driver details were found
+                {
+                    // Map the driver details to the response DTO
+                    var mappedDriver = _mapper.Map<UserReponseInformation>(driverDetails);
+                    driverResponses.Add(mappedDriver);
+                }
+            }
+
+        //    var DriverReponse = _mapper.Map<IEnumerable<UserReponseInformation>>(getDriver);
 
             if (getDriver == null)
             {
@@ -133,25 +149,27 @@ namespace UberSystem.Api.Customer.Controllers
                     Message = "No driver near by found"
                 });
             }
-            return Ok(new ApiResponseModel<IEnumerable<Driver>>
+            return Ok(new ApiResponseModel<IEnumerable<UserReponseInformation>>
 
 
             {
                 StatusCode = HttpStatusCode.OK,
-                Data = getDriver
+                Data = driverResponses
 
             });
         }
 
-        [HttpPost]
+        [HttpPost("create-trip")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> CreateTrip(TripRequest request)
         {
             try
             {
+
                 var trip = _mapper.Map<Trip>(request);
                 trip.Status = "0";
-                var paymentId= await _tripService.tripOrder(trip);
+
+                var paymentId = await _tripService.tripOrder(trip);
                 var payment = _mapper.Map<Payment>(request);
                 payment.TripId = paymentId;
 

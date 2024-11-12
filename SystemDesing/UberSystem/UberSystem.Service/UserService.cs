@@ -448,10 +448,18 @@ namespace UberSystem.Service
 
         }
 
-     /*   public Task<bool> userOrder()
+        public async Task<IEnumerable<User>> getAll()
         {
 
-        }*/
+            var userRepo = _unitOfWork.Repository<User>();
+            var  listUser = await userRepo.GetAllAsync();
+            return listUser;
+        }
+
+        /*   public Task<bool> userOrder()
+           {
+
+           }*/
     }
 }
 

@@ -27,6 +27,7 @@ namespace UberSystem.Domain.Interfaces.Services
 
 
         Task<bool> CustomerOrderStatus(long customerid);
+        Task<IEnumerable< Trip>> getAllHistoryTripBaseDriverId(long driverId);
 
 
 
